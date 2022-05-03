@@ -1,7 +1,7 @@
 import requests
 import time
 import logging
-from env_search import BEARER_PUBLIC_API, PUBLIC_API
+from env_search import BEARER_PUBLIC_API
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
@@ -21,21 +21,18 @@ def retry(func, retries=4):
     return retry_wrapper
 
 def base_data():
-    base = PUBLIC_API
     headers = {
         "Authorization": f"Bearer {BEARER_PUBLIC_API}"
     }
-    return base, headers
+    return headers
 
 
 @retry
 def list_of_collections():
-    base, headers = base_data()
-    resp = requests.get(url='https://apexgoapi.com/v1/collections?limit=100', headers=headers)
+    resp = requests.get(url='https://apexgoapi.com/v1/collections?limit=2147483647', headers=base_data())
     return resp.json()
 
 @retry
-def list_of_transactions(collection):
-    base, headers = base_data()
-    resp = requests.get(url='https://apexgoapi.com/v1/transactions?collection_name={collection}&offset=50', headers=headers)
+def list_of_transactions(collection, days):
+    resp = requests.get(url=f"https://apexgoapi.com/v1/transactions?collection_name={collection}&interval_days={days}", headers=base_data())
     return resp.json()

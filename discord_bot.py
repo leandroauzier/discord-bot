@@ -1,28 +1,43 @@
 import time
+import math
 import discord
 import logging
 from env_search import DISCORD_TOKEN
-from public_api import list_of_collections
+from public_api import list_of_collections, list_of_transactions
+from query import get_from_db, get_collection_from_db, set_collection_server_id
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 def get_collections():
-    print('Entered Function!')
     myReq = list_of_collections()
     reformed = []
     for coll in myReq:
         if coll is not None:
-            reformed.append(coll['name'])
+            reformed.append((coll['name'], coll['acronym']))
     return reformed
 
 
 class ApexClient(discord.Client):
     async def on_ready(self):
         print(f'{self.user} is ready for use on Discord!')
-
     async def on_message(self, message):
-        if message.content == '!help' or message.content == '!Help' or message.content == '!HELP:':
+        if message.content == '!configbot':
+            print('START CONFIGBOT')
+            await message.channel.send('Type the number for configuration:\n1-Set Collection')
+            response = await client.wait_for('message')
+            print(response.content)
+            if response.content == '1':
+                print('ENTERED 1')
+                await message.channel.send('Please insert the contract of your collection:')
+                contract = await client.wait_for('message')
+                if set_collection_server_id(contract.content, message.guild.id) == False:
+                    await message.channel.send('This collection was already set up!')
+                print('FUNCTION FINISHED!')
+            else:
+                print("Don't match any option")
+        
+        elif message.content == '!help' or message.content == '!Help' or message.content == '!HELP:':
             dm = (f"{message.author.name}, Here are some commands you can type (always use '!'):\n"
             "- !help [bot returns you this command list again]\n"
             "- !hello [bot returns you a hello text]\n"
@@ -41,22 +56,71 @@ class ApexClient(discord.Client):
                                     f"If you have any doubts or questions, please contact the Admins")
         elif message.content == '!api':
             await message.channel.send(f"{message.author.name}, here's the link of ApexGo API:\nhttps://apexgo.io/extension/")
-        elif message.content == '!transaction tbc':
-            await message.author.send(f"Last 50 transactions of Tron Bull Club:\n")
-        elif message.content == '!collections':
-            collections = get_collections()
+          
+        elif message.content in ['!transactions 7','!transactions 15','!transactions 30']:  
+            days = 0
+            if message.content == f'!transactions 7':
+                days = 7
+            elif message.content == f'!transactions 15':
+                days = 15
+            elif message.content == f'!transactions 30':
+                days = 30
+            cur_server_id = message.guild.id
+            slct_collection = get_collection_from_db(cur_server_id)            
+            transactions = list_of_transactions(slct_collection,days)
+            waitsec = 1
+            count_trans = 0
+            current_highest = 0
+            current_lowest = 999999999999999999999
+            curr_lowest_coin = ""
+            curr_highest_coin = ""
+            highest_t = 0
+            lowest_t = 0
+            if len(transactions) > 0:
+                embed = discord.Embed()
+                for t in transactions:
+                    embed.description = '# ID: ' + "[" + t['token_id']+"]"+"(https://apexgo.io/nft/"+t['collection_name']+'/'+t['token_id']+')' + ' , value: ' + str(int(t['price'])/ pow(10, 18)) + ' ' + t['coin_symbol']
+                    if len(str(t)) <= 2000:
+                        await message.channel.send(embed=embed)
+                        count_trans += 1
+                        if int(t['price']) > current_highest:
+                            current_highest = int(t['price'])
+                            curr_highest_coin = t['coin_name']
+                        if int(t['price']) < current_lowest:
+                            current_lowest = int(t['price'])
+                            curr_lowest_coin = t['coin_name']
+                    else:
+                        print('The length was greater than 2000')
+                lowest_t = current_lowest / pow(10, 18)
+                lowest_coin = curr_lowest_coin
+                highest_t = current_highest / pow(10, 18)
+                highest_coin = curr_highest_coin
+                await message.channel.send(f"\n:point_up: Check out the NFT on Apexgo.io by clicking on ID Number :point_up: ")
+                if count_trans == 1:
+                    await message.channel.send(f"\n:triangular_flag_on_post: There was {count_trans} Transaction of {slct_collection} in the last {days} days\n:arrow_forward: The lowest Transaction has value of {lowest_t} {lowest_coin}\n:arrow_forward: The highest Transaction has value of {highest_t} {highest_coin}")
+                elif count_trans > 1:
+                    await message.channel.send(f"\n:triangular_flag_on_post: There were {count_trans} Transactions of {slct_collection} in the last {days} days\n:arrow_forward: The lowest Transaction has value of {lowest_t} {lowest_coin}\n:arrow_forward: The highest Transaction has value of {highest_t} {highest_coin}")
+            else:
+                no_transactions_msg = f"There were no {slct_collection} Transactions in the last {days} days!"
+                await message.channel.send(no_transactions_msg)
+                
+        elif message.content == '!dev:collections':
+            collections = get_from_db()
+            waitsec = 1
             coll_list = ""
             for c in collections:
-                if len(c) + len(coll_list) <= 2000:
-                    coll_list += c +'\n'
-                    print(c)
-                elif len(c) + len(coll_list) > 2000:
-                    print('this is the list: %s',coll_list)
+                if int(math.log10(c[0]))+1 + len(c[1]) + len(c[2]) + len(coll_list) <= 2000:
+                    coll_list += c[1] + ' - ' + c[2] +'\n'
+                elif int(math.log10(c[0]))+1 + len(c[1]) + len(c[2]) + len(coll_list) > 2000:
                     await message.author.send(coll_list)
                     coll_list = ""
-                    print('sleeping for 5 seconds...')
-                    time.sleep(5)
-            await message.author.send(f"\nThis are the collections that you can search by using '!transactions <collection name>':")
+                    coll_list += c[1] + ' - ' + c[2] +'\n'
+                    print(f'sleeping for {waitsec} seconds...')
+                    time.sleep(waitsec)
+            if len(coll_list) > 0:
+                print(coll_list)
+                await message.author.send(coll_list)
+            await message.author.send(f"\n:arrow_up: :arrow_up: This are the collections that you can search by using '!transactions <acronym>' :arrow_up: :arrow_up: ")
 
     async def on_member_join(self, member):
         guild = member.guild
