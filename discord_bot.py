@@ -41,7 +41,7 @@ class ApexClient(discord.Client):
             dm = (f"{message.author.name}, Here are some commands you can type (always use '!'):\n"
             "- !help [bot returns you this command list again]\n"
             "- !hello [bot returns you a hello text]\n"
-            "- !rules [returns you the rules that this server demands from its integrants]\n"
+            "- !rules [returns you the rules that this server demands from its members]\n"
             "- !api [returns you the link of ApexGO's Public API documentation]\n")
             await message.channel.send(dm)
         elif message.content == '!hello' or message.content == '!Hello' or message.content == '!HELLO':
@@ -67,7 +67,14 @@ class ApexClient(discord.Client):
                 days = 30
             cur_server_id = message.guild.id
             slct_collection = get_collection_from_db(cur_server_id)            
-            transactions = list_of_transactions(slct_collection,days)
+            full_transactions = list_of_transactions(slct_collection,days)
+            print(full_transactions)
+            transactions = []
+            for i in full_transactions:
+                if len(transactions) < 20:
+                    transactions.append(i)
+            print(len(transactions))
+            print(transactions)
             waitsec = 1
             count_trans = 0
             current_highest = 0
@@ -97,9 +104,9 @@ class ApexClient(discord.Client):
                 highest_coin = curr_highest_coin
                 await message.channel.send(f"\n:point_up: Check out the NFT on Apexgo.io by clicking on ID Number :point_up: ")
                 if count_trans == 1:
-                    await message.channel.send(f"\n:triangular_flag_on_post: There was {count_trans} Transaction of {slct_collection} in the last {days} days\n:arrow_forward: The lowest Transaction has value of {lowest_t} {lowest_coin}\n:arrow_forward: The highest Transaction has value of {highest_t} {highest_coin}")
+                    await message.channel.send(f"\n:triangular_flag_on_post: This was the last {count_trans} Transaction of {slct_collection} in the last {days} days\n:arrow_forward: The Floor Price has value of {lowest_t} {lowest_coin}\n:arrow_forward: The Highest Price has value of {highest_t} {highest_coin}")
                 elif count_trans > 1:
-                    await message.channel.send(f"\n:triangular_flag_on_post: There were {count_trans} Transactions of {slct_collection} in the last {days} days\n:arrow_forward: The lowest Transaction has value of {lowest_t} {lowest_coin}\n:arrow_forward: The highest Transaction has value of {highest_t} {highest_coin}")
+                    await message.channel.send(f"\n:triangular_flag_on_post: These were the last {count_trans} Transactions of {slct_collection} in the last {days} days\n:arrow_forward: The Floor Price has value of {lowest_t} {lowest_coin}\n:arrow_forward: The Highest Price has value of {highest_t} {highest_coin}")
             else:
                 no_transactions_msg = f"There were no {slct_collection} Transactions in the last {days} days!"
                 await message.channel.send(no_transactions_msg)
