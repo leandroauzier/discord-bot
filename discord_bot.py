@@ -17,7 +17,6 @@ def get_collections():
             reformed.append((coll['name'], coll['acronym']))
     return reformed
 
-
 class ApexClient(discord.Client):
     async def on_ready(self):
         print(f'{self.user} is ready for use on Discord!')
