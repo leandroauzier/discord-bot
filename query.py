@@ -3,7 +3,7 @@ import mysql.connector
 import logging
 from env_search import DB_STRING
 
-connection_list = [i.split("=") for i in os.environ.get("DB_STRING").split(" ")]
+connection_list = [i.split("=") for i in os.environ.get("DB_STRING").split(",")]
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
