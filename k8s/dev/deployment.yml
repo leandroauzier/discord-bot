@@ -19,4 +19,24 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "100m"
+        env:
+        
+          - name: discordToken
+            valueFrom:
+              secretKeyRef:
+                name: dev-discord-bot-secrets
+                key: DISCORD_TOKEN
+
+          - name: bearerPublicAPI
+            valueFrom:
+              secretKeyRef:
+                name: dev-discord-bot-secrets
+                key: BEARER_PUBLIC_API
+
+          - name: dbString
+            valueFrom:
+              secretKeyRef:
+                name: dev-discord-bot-secrets
+                key: DB_STRING
+
 
