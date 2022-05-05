@@ -22,7 +22,7 @@ steps:
   - --cluster=dev-discord-bot
 
 
-  availableSecrets:
+availableSecrets:
   secretManager:
   - versionName: projects/$PROJECT_ID/secrets/DEV_DISCORD_TOKEN/versions/latest
     env: 'DEV_DISCORD_TOKEN'
