@@ -1,9 +1,6 @@
-import os
 import mysql.connector
 import logging
-from env_search import DB_STRING
-
-connection_list = [i.split("=") for i in os.environ.get("DB_STRING").split("+")]
+from env_search import DATABASE, HOST, PASSWORD, USER
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
@@ -11,10 +8,10 @@ logger = logging.getLogger()
 def conn():
     try:
         discord_db = mysql.connector.connect(
-        host= connection_list[0][1],
-        user= connection_list[1][1],
-        password= connection_list[2][1],
-        database= connection_list[3][1]        
+        host= HOST,
+        database= DATABASE,
+        user= USER,
+        password= PASSWORD
         )
         discord_db.commit()
         logger.info('Connected to the database')
@@ -22,6 +19,7 @@ def conn():
     except Exception as e:
         logger.error("Couldn't connect to database", exc_info=True)
         raise e
+
     
 def get_from_db():
     db_query = []

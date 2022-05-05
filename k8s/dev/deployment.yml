@@ -33,10 +33,28 @@ spec:
                 name: dev-discord-bot-secrets
                 key: BEARER_PUBLIC_API
 
-          - name: dbString
+          - name: dbName
             valueFrom:
               secretKeyRef:
                 name: dev-discord-bot-secrets
-                key: DB_STRING
+                key: DATABASE
+
+          - name: dbPass
+            valueFrom:
+              secretKeyRef:
+                name: dev-discord-bot-secrets
+                key: PASSWORD
+
+          - name: dbUser
+            valueFrom:
+              secretKeyRef:
+                name: dev-discord-bot-secrets
+                key: USER
+
+          - name: dbHost
+            valueFrom:
+              secretKeyRef:
+                name: dev-discord-bot-secrets
+                key: HOST
 
 
