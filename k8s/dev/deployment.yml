@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-discord-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dev-discord-bot
+  template:
+    metadata:
+      labels:
+        app: dev-discord-bot
+    spec:
+      containers:
+      - name: dev-discord-bot
+        image: gcr.io/mercurial-feat-328320/dev-discord-bot:latest
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "100m"
+
