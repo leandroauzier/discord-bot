@@ -5,7 +5,7 @@ steps:
   args: 
     - -c
     - |
-        dockerbuild -t gcr.io/$PROJECT_ID/dev-discord-bot:latest --build-arg DISCORD_TOKEN=$$DEV_DISCORD_TOKEN --build-arg BEARER_PUBLIC_API=$$DEV_BEARER_PUBLIC_API --build-arg HOST=$$DEV_DISC_HOST --build-arg USER=$$DEV_DISC_USER --build-arg PASSWORD=$$DEV_DISC_PASSWORD --build-arg DATABASE=$$DEV_DISC_DATABASE .
+        docker image build -t gcr.io/$PROJECT_ID/dev-discord-bot:latest --build-arg DISCORD_TOKEN=$$DEV_DISCORD_TOKEN --build-arg BEARER_PUBLIC_API=$$DEV_BEARER_PUBLIC_API --build-arg HOST=$$DEV_DISC_HOST --build-arg USER=$$DEV_DISC_USER --build-arg PASSWORD=$$DEV_DISC_PASSWORD --build-arg DATABASE=$$DEV_DISC_DATABASE .
   secretEnv: ['DEV_DISCORD_TOKEN', 'DEV_BEARER_PUBLIC_API', 'DEV_DISC_HOST', 'DEV_DISC_USER', 'DEV_DISC_PASSWORD', 'DEV_DISC_DATABASE']
 
 
