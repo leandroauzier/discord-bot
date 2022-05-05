@@ -56,5 +56,3 @@ spec:
               secretKeyRef:
                 name: dev-discord-bot-secrets
                 key: HOST
-
-
