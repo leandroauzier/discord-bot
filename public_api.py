@@ -39,12 +39,9 @@ def list_of_transactions(collection, days):
     return resp.json()
 
 @retry
-def rarity_from_collection(collection):
-    resp = requests.get(url=f"https://dev-apexgopublicapi.com/v1/collection?collection_name={collection}", headers=base_data())
-    list_rarity = []
+def info_from_collection(collection, token_id):
+    resp = requests.get(url=f"https://dev-apexgopublicapi.com/v1/collection?collection_name={collection}&limit=2147483647", headers=base_data())
+    infos = []
     for i in resp.json()['items']:
-        list_rarity.append(i['rarity_score'])
-    print(list_rarity)
-    return resp.json()
-
-rarity_from_collection('neo-tokyo-identities')
+        if i['token_id'] == token_id:
+            return i

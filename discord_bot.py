@@ -1,10 +1,11 @@
+from secrets import token_bytes
 import time
 import math
 import discord
 import logging
 from env_search import DISCORD_TOKEN
-from public_api import list_of_collections, list_of_transactions, rarity_from_collection
-from query import get_from_db, get_collection_from_db, set_collection_server_id
+from public_api import list_of_collections, list_of_transactions, info_from_collection
+from query import get_collection_from_db, set_collection_server_id
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
@@ -110,10 +111,16 @@ class ApexClient(discord.Client):
             else:
                 no_transactions_msg = f"There were no {slct_collection} Transactions in the last {days} days!"
                 await message.channel.send(no_transactions_msg)
-        elif message.content == f'!info':
+                
+        elif message.content == f'!nft':
+            await message.channel.send(f"{message.mention}, Please insert the ID of the NFT you want to know more about:")
+            token_id = await client.wait_for('message')
             cur_server_id = message.guild.id
             slct_collection = get_collection_from_db(cur_server_id)
-            rarity = rarity_from_collection(slct_collection)    
+            nft_info = info_from_collection(slct_collection, token_id.content)
+            await message.channel.send(f"{message.mention}, Here's the info about the NFT you requested:\n\n")
+            for k,v in nft_info.items():
+                await message.channel.send(f"{k}: {v}")
 
     async def on_member_join(self, member):
         guild = member.guild
