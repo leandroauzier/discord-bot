@@ -33,16 +33,17 @@ class ApexClient(discord.Client):
             else:
                 print("Don't match any option")
         
-        elif message.content == '!help' or message.content == '!Help' or message.content == '!HELP:':
-            dm = (f"{message.author.name}, Here are some commands you can type (always use '!'):\n"
+        elif message.content == '!help':
+            dm = (f":wave: @{message.author.name}, Here are some commands you can type (always use '!'):\n\n"
             "- !help [bot returns you this command list again]\n"
             "- !hello [bot returns you a hello text]\n"
             "- !rules [returns you the rules that this server demands from its members]\n"
-            "- !api [returns you the link of ApexGO's Public API documentation]\n")
+            "- !api [returns you the link of ApexGO's Public API documentation]\n"
+            "- !transactions <days> [returns you the last 20 transactions in the input days, (7, 15 ,30)]\n")
             await message.channel.send(dm)
-        elif message.content == '!hello' or message.content == '!Hello' or message.content == '!HELLO':
+        elif message.content == '!hello':
             await message.channel.send(f'!Hello, {message.author.name}')
-        elif message.content == '!rules' or message.content == '!Rules' or message.content == '!RULES':
+        elif message.content == '!rules':
             await message.channel.send(f":rotating_light: {message.author.name}, Check out our server rules: :rotating_light:\n\n1-Be respectful\n" # noqa:
                                     f"2- Sending any harmful material such as malwares or harmware results in an immediate and permanent ban.\n" # noqa:
                                     f"3- Use English grammar and spelling and don't spam.\n"
@@ -51,7 +52,7 @@ class ApexClient(discord.Client):
                                     f"6- Do not post NSFW content.\n\n"
                                     f"If you have any doubts or questions, please contact the Admins")
         elif message.content == '!api':
-            await message.channel.send(f"{message.author.name}, here's the link of ApexGo API:\nhttps://apexgo.io/extension/")
+            await message.channel.send(f"@{message.author.name}, here's the link of ApexGo API:\nhttps://apexgo.io/extension/")
           
         elif message.content in ['!transactions 7','!transactions 15','!transactions 30']:  
             days = 0
@@ -100,30 +101,12 @@ class ApexClient(discord.Client):
                 highest_coin = curr_highest_coin
                 await message.channel.send(f"\n:point_up: Check out the NFT on Apexgo.io by clicking on ID Number :point_up: ")
                 if count_trans == 1:
-                    await message.channel.send(f"\n:triangular_flag_on_post: This was the last {count_trans} Transaction of {slct_collection} in the last {days} days\n:arrow_forward: The Floor Price has value of {lowest_t} {lowest_coin}\n:arrow_forward: The Highest Price has value of {highest_t} {highest_coin}")
+                    await message.channel.send(f"\n:triangular_flag_on_post: This was the last {count_trans} Transaction of {slct_collection} in the last {days} days\n:arrow_forward: The Floor Price has value of {lowest_t} {lowest_coin}\n:arrow_forward: The Celling Price has value of {highest_t} {highest_coin}")
                 elif count_trans > 1:
-                    await message.channel.send(f"\n:triangular_flag_on_post: These were the last {count_trans} Transactions of {slct_collection} in the last {days} days\n:arrow_forward: The Floor Price has value of {lowest_t} {lowest_coin}\n:arrow_forward: The Highest Price has value of {highest_t} {highest_coin}")
+                    await message.channel.send(f"\n:triangular_flag_on_post: These were the last {count_trans} Transactions of {slct_collection} in the last {days} days\n:arrow_forward: The Floor Price has value of {lowest_t} {lowest_coin}\n:arrow_forward: The celling Price has value of {highest_t} {highest_coin}")
             else:
                 no_transactions_msg = f"There were no {slct_collection} Transactions in the last {days} days!"
                 await message.channel.send(no_transactions_msg)
-                
-        elif message.content == '!dev:collections':
-            collections = get_from_db()
-            waitsec = 1
-            coll_list = ""
-            for c in collections:
-                if int(math.log10(c[0]))+1 + len(c[1]) + len(c[2]) + len(coll_list) <= 2000:
-                    coll_list += c[1] + ' - ' + c[2] +'\n'
-                elif int(math.log10(c[0]))+1 + len(c[1]) + len(c[2]) + len(coll_list) > 2000:
-                    await message.author.send(coll_list)
-                    coll_list = ""
-                    coll_list += c[1] + ' - ' + c[2] +'\n'
-                    print(f'sleeping for {waitsec} seconds...')
-                    time.sleep(waitsec)
-            if len(coll_list) > 0:
-                print(coll_list)
-                await message.author.send(coll_list)
-            await message.author.send(f"\n:arrow_up: :arrow_up: This are the collections that you can search by using '!transactions <acronym>' :arrow_up: :arrow_up: ")
 
     async def on_member_join(self, member):
         guild = member.guild

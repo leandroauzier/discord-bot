@@ -29,10 +29,10 @@ def base_data():
 
 @retry
 def list_of_collections():
-    resp = requests.get(url='https://apexgoapi.com/v1/collections?limit=2147483647', headers=base_data())
+    resp = requests.get(url='https://dev-apexgopublicapi.com/v1/collections?limit=2147483647', headers=base_data())
     return resp.json()
 
 @retry
 def list_of_transactions(collection, days):
-    resp = requests.get(url=f"https://apexgoapi.com/v1/transactions?collection_name={collection}&interval_days={days}", headers=base_data())
+    resp = requests.get(url=f"https://dev-apexgopublicapi.comv1/transactions?collection_name={collection}&interval_days={days}", headers=base_data())
     return resp.json()
