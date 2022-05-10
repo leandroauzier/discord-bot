@@ -113,12 +113,12 @@ class ApexClient(discord.Client):
                 await message.channel.send(no_transactions_msg)
                 
         elif message.content == f'!nft':
-            await message.channel.send(f"{message.mention}, Please insert the ID of the NFT you want to know more about:")
+            await message.channel.send(f"{message.author.mention}, Please insert the ID of the NFT you want to know more about:")
             token_id = await client.wait_for('message')
             cur_server_id = message.guild.id
             slct_collection = get_collection_from_db(cur_server_id)
             nft_info = info_from_collection(slct_collection, token_id.content)
-            await message.channel.send(f"{message.mention}, Here's the info about the NFT you requested:\n\n")
+            await message.channel.send(f"{message.author.mention}, Here's the info about the NFT you requested:\n\n")
             for k,v in nft_info.items():
                 await message.channel.send(f"{k}: {v}")
 
