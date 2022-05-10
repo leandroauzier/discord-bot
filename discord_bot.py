@@ -3,7 +3,7 @@ import math
 import discord
 import logging
 from env_search import DISCORD_TOKEN
-from public_api import list_of_collections, list_of_transactions
+from public_api import list_of_collections, list_of_transactions, rarity_from_collection
 from query import get_from_db, get_collection_from_db, set_collection_server_id
 
 logging.basicConfig(level=logging.INFO)
@@ -20,7 +20,10 @@ def get_collections():
 class ApexClient(discord.Client):
     async def on_ready(self):
         print(f'{self.user} is ready for use on Discord!')
+        
     async def on_message(self, message):
+        if message.author == client.user:
+            return
         if message.content == '!configbot':
             await message.channel.send('Type the number for configuration:\n1-Set Collection')
             response = await client.wait_for('message')
@@ -34,7 +37,7 @@ class ApexClient(discord.Client):
                 print("Don't match any option")
         
         elif message.content == '!help':
-            dm = (f":wave: @{message.author.name}, Here are some commands you can type (always use '!'):\n\n"
+            dm = (f":wave: {message.author.name}, Here are some commands you can type (always use '!'):\n\n"
             "- !help [bot returns you this command list again]\n"
             "- !hello [bot returns you a hello text]\n"
             "- !rules [returns you the rules that this server demands from its members]\n"
@@ -63,7 +66,7 @@ class ApexClient(discord.Client):
             elif message.content == f'!transactions 30':
                 days = 30
             cur_server_id = message.guild.id
-            slct_collection = get_collection_from_db(cur_server_id)            
+            slct_collection = get_collection_from_db(cur_server_id)
             full_transactions = list_of_transactions(slct_collection,days)
             print(full_transactions)
             transactions = []
@@ -107,6 +110,10 @@ class ApexClient(discord.Client):
             else:
                 no_transactions_msg = f"There were no {slct_collection} Transactions in the last {days} days!"
                 await message.channel.send(no_transactions_msg)
+        elif message.content == f'!info':
+            cur_server_id = message.guild.id
+            slct_collection = get_collection_from_db(cur_server_id)
+            rarity = rarity_from_collection(slct_collection)    
 
     async def on_member_join(self, member):
         guild = member.guild

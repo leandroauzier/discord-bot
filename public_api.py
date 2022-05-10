@@ -1,3 +1,4 @@
+from subprocess import list2cmdline
 import requests
 import time
 import logging
@@ -34,5 +35,16 @@ def list_of_collections():
 
 @retry
 def list_of_transactions(collection, days):
-    resp = requests.get(url=f"https://dev-apexgopublicapi.comv1/transactions?collection_name={collection}&interval_days={days}", headers=base_data())
+    resp = requests.get(url=f"https://dev-apexgopublicapi.com/v1/transactions?collection_name={collection}&interval_days={days}", headers=base_data())
     return resp.json()
+
+@retry
+def rarity_from_collection(collection):
+    resp = requests.get(url=f"https://dev-apexgopublicapi.com/v1/collection?collection_name={collection}", headers=base_data())
+    list_rarity = []
+    for i in resp.json()['items']:
+        list_rarity.append(i['rarity_score'])
+    print(list_rarity)
+    return resp.json()
+
+rarity_from_collection('neo-tokyo-identities')
