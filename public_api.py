@@ -1,3 +1,4 @@
+from distutils.log import info
 from subprocess import list2cmdline
 import requests
 import time
@@ -39,9 +40,8 @@ def list_of_transactions(collection, days):
     return resp.json()
 
 @retry
-def info_from_collection(collection, token_id):
+def info_from_collection(collection):
     resp = requests.get(url=f"https://dev-apexgopublicapi.com/v1/collection?collection_name={collection}&limit=2147483647", headers=base_data())
-    infos = []
-    for i in resp.json()['items']:
-        if i['token_id'] == token_id:
-            return i
+    return resp.json()
+
+# info_from_collection('neo-tokyo-identities', '220')

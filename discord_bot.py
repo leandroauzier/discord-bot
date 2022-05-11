@@ -29,7 +29,7 @@ class ApexClient(discord.Client):
             await message.channel.send('Type the number for configuration:\n1-Set Collection')
             response = await client.wait_for('message')
             print(response.content)
-            if response.content == '1':
+            if response.content == '1' and message.author == self.user:
                 await message.channel.send('Please insert the contract of your collection:')
                 contract = await client.wait_for('message')
                 if set_collection_server_id(contract.content, message.guild.id) == False:
@@ -117,10 +117,18 @@ class ApexClient(discord.Client):
             token_id = await client.wait_for('message')
             cur_server_id = message.guild.id
             slct_collection = get_collection_from_db(cur_server_id)
-            nft_info = info_from_collection(slct_collection, token_id.content)
+            nft_info = info_from_collection(slct_collection)
             await message.channel.send(f"{message.author.mention}, Here's the info about the NFT you requested:\n\n")
-            for k,v in nft_info.items():
-                await message.channel.send(f"{k}: {v}")
+            msg = ''
+            for i in nft_info['items']:
+                if i['token_id'] == token_id.content:
+                    for k,v in i.items():
+                        if k in ['token_id','name','resource_link','meta_score','rarity_score',
+                                'score','ranking', 'adjusted_meta_score', 'adjusted_rarity_score', 
+                                'adjusted_score', 'adjusted_ranking', 'last_price', 'owner'] and v not in [None, '']:
+                            msg+=f'{k}: {v}'+'\n'
+            print(msg)
+            await message.channel.send(msg)
 
     async def on_member_join(self, member):
         guild = member.guild
