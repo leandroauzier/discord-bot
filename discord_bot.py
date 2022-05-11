@@ -128,7 +128,7 @@ class ApexClient(discord.Client):
                                 'adjusted_score', 'adjusted_ranking', 'last_price', 'owner'] and v not in [None, '']:
                             msg+=f'{k}: {v}'+'\n'
                             if k == 'resource_link':
-                                img = k
+                                img = v
             await message.channel.send(img)
             await message.channel.send(msg)
 
