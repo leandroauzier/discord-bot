@@ -69,14 +69,10 @@ class ApexClient(discord.Client):
             cur_server_id = message.guild.id
             slct_collection = get_collection_from_db(cur_server_id)
             full_transactions = list_of_transactions(slct_collection,days)
-            print(full_transactions)
             transactions = []
             for i in full_transactions:
                 if len(transactions) < 20:
                     transactions.append(i)
-            print(len(transactions))
-            print(transactions)
-            waitsec = 1
             count_trans = 0
             current_highest = 0
             current_lowest = 999999999999999999999
@@ -86,7 +82,7 @@ class ApexClient(discord.Client):
             lowest_t = 0
             if len(transactions) > 0:
                 embed = discord.Embed()
-                for t in transactions:
+                for t in transactions['response']:
                     embed.description = '# ID: ' + "[" + t['token_id']+"]"+"(https://apexgo.io/nft/"+t['collection_name']+'/'+t['token_id']+')' + ' , value: ' + str(int(t['price'])/ pow(10, 18)) + ' ' + t['coin_symbol']
                     if len(str(t)) <= 2000:
                         await message.channel.send(embed=embed)
