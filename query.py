@@ -57,12 +57,8 @@ def get_collection_from_db(server_id):
 
 
 def set_collection_server_id(contract, server_id):
-    print(f'Contract: {contract}')
-    print(f'Server_ID: {server_id}')
-    print('ENTERED QUERY')
     c_list = get_from_db()
     for c in c_list:
-        print(c)
         if contract != c[3]:
             pass
         elif contract == c[3]:

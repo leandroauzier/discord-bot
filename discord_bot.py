@@ -1,5 +1,6 @@
 import discord
 import logging
+from cairosvg import svg2png
 from env_search import DISCORD_TOKEN
 from public_api import list_of_collections, list_of_transactions, info_from_collection
 from query import get_collection_from_db, set_collection_server_id
@@ -23,21 +24,20 @@ class ApexClient(discord.Client):
         if message.author == client.user:
             return
         if message.content == '!configbot':
-            await message.channel.send('Type the number for bonfiguration:\n1-Set Collection')
+            await message.channel.send('Type the number for configuration:\n1-Set Collection')
             def check(m):
                 if m.author == message.author:
                     return m.content == '1' and m.channel == message.channel
             m = await client.wait_for('message', check=check)
-            # if response.content == '1' and response.author == message.author:
-            await message.channel.send(f'{m.author}, Please insert the contract of your bollection:')
+            await message.channel.send(f'{m.author}, Please insert the contract of your collection:')
             def confirm(contract):
-                return contract.channel == message.channel
+                if m.author == message.author:
+                    return contract.channel == message.channel
             contract = await client.wait_for('message', check=confirm)
-            # contract = await client.wait_for('message')
             if set_collection_server_id(contract.content, message.guild.id) == False:
                 await message.channel.send('This collection was already set up!')
             else:
-                print("Don't match any option")
+                await message.channel.send('contract updated!')
         
         elif message.content == '!help':
             dm = (f":wave: {message.author.name}, Here are some commands you can type (always use '!'):\n\n"
@@ -45,7 +45,8 @@ class ApexClient(discord.Client):
             "- !hello [bot returns you a hello text]\n"
             "- !rules [returns you the rules that this server demands from its members]\n"
             "- !api [returns you the link of ApexGO's Public API documentation]\n"
-            "- !transactions <days> [returns you the last 20 transactions in the input days, (7, 15 ,30)]\n")
+            "- !transactions <days> [returns you the last 20 transactions in the input days, (7, 15 ,30)]\n"
+            "- !nft [Get information for a specific ID NFT]\n")
             await message.channel.send(dm)
         elif message.content == '!hello':
             await message.channel.send(f'!Hello, {message.author.name}')
@@ -112,7 +113,10 @@ class ApexClient(discord.Client):
                 
         elif message.content == f'!nft':
             await message.channel.send(f"{message.author.mention}, Please insert the ID of the NFT you want to know more about:")
-            token_id = await client.wait_for('message')
+            def check(token_id):
+                if token_id.author == message.author:
+                    return m.channel == message.channel
+            token_id = await client.wait_for('message', check=check)
             cur_server_id = message.guild.id
             slct_collection = get_collection_from_db(cur_server_id)
             nft_info = info_from_collection(slct_collection)
@@ -127,8 +131,9 @@ class ApexClient(discord.Client):
                                 'adjusted_score', 'adjusted_ranking', 'last_price', 'owner'] and v not in [None, '']:
                             msg+=f'{k}: {v}'+'\n'
                             if k in 'image':
-                                img = v
-                                await message.channel.send(img)
+                                img += v
+            png = svg2png(url=img, write_to='image.png')
+            await message.channel.send(png)
             await message.channel.send(msg)
 
     async def on_member_join(self, member):
