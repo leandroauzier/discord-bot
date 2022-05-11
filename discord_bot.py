@@ -27,8 +27,7 @@ class ApexClient(discord.Client):
         if message.content == '!configbot':
             await message.channel.send('Type the number for configuration:\n1-Set Collection')
             response = await client.wait_for('message')
-            print(response.content)
-            if response.content == '1' and message.author == client.user:
+            if response.content == '1' and response.author == message.author:
                 await message.channel.send('Please insert the contract of your collection:')
                 contract = await client.wait_for('message')
                 if set_collection_server_id(contract.content, message.guild.id) == False:
