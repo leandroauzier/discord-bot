@@ -43,5 +43,3 @@ def list_of_transactions(collection, days):
 def info_from_collection(collection):
     resp = requests.get(url=f"https://dev-apexgopublicapi.com/v1/collection?collection_name={collection}", headers=base_data())
     return resp.json()
-
-info_from_collection('neo-tokyo-identities', '220')
