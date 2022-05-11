@@ -26,12 +26,17 @@ class ApexClient(discord.Client):
             return
         if message.content == '!configbot':
             await message.channel.send('Type the number for configuration:\n1-Set Collection')
-            response = await client.wait_for('message')
-            if response.content == '1' and response.author == message.author:
-                await message.channel.send('Please insert the contract of your collection:')
-                contract = await client.wait_for('message')
-                if set_collection_server_id(contract.content, message.guild.id) == False:
-                    await message.channel.send('This collection was already set up!')
+            def check(m):
+                return m.content == '1' and m.channel == message.channel
+            m = await client.wait_for('message', check=check)
+            # if response.content == '1' and response.author == message.author:
+            await message.channel.send(f'{m.author}, Please insert the contract of your collection:')
+            def confirm(contract):
+                return contract.channel == message.channel
+            contract = await client.wait_for('message', check=confirm)
+            # contract = await client.wait_for('message')
+            if set_collection_server_id(contract.content, message.guild.id) == False:
+                await message.channel.send('This collection was already set up!')
             else:
                 print("Don't match any option")
         
