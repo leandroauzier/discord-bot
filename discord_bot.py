@@ -127,7 +127,9 @@ class ApexClient(discord.Client):
                                 'score','ranking', 'adjusted_meta_score', 'adjusted_rarity_score', 
                                 'adjusted_score', 'adjusted_ranking', 'last_price', 'owner'] and v not in [None, '']:
                             msg+=f'{k}: {v}'+'\n'
-            print(msg)
+                            if k == 'resource_link':
+                                img = k
+            await message.channel.send(img)
             await message.channel.send(msg)
 
     async def on_member_join(self, member):
