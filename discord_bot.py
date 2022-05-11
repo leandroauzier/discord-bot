@@ -1,5 +1,3 @@
-import time
-import math
 import discord
 import logging
 from env_search import DISCORD_TOKEN
@@ -25,12 +23,13 @@ class ApexClient(discord.Client):
         if message.author == client.user:
             return
         if message.content == '!configbot':
-            await message.channel.send('Type the number for configuration:\n1-Set Collection')
+            await message.channel.send('Type the number for bonfiguration:\n1-Set Collection')
             def check(m):
-                return m.content == '1' and m.channel == message.channel
+                if m.author == message.author:
+                    return m.content == '1' and m.channel == message.channel
             m = await client.wait_for('message', check=check)
             # if response.content == '1' and response.author == message.author:
-            await message.channel.send(f'{m.author}, Please insert the contract of your collection:')
+            await message.channel.send(f'{m.author}, Please insert the contract of your bollection:')
             def confirm(contract):
                 return contract.channel == message.channel
             contract = await client.wait_for('message', check=confirm)
