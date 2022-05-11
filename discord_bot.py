@@ -115,6 +115,7 @@ class ApexClient(discord.Client):
             nft_info = info_from_collection(slct_collection)
             await message.channel.send(f"{message.author.mention}, Here's the info about the NFT you requested:\n\n")
             msg = ''
+            img = ''
             for i in nft_info['response']['nfts']:
                 if i['nft_id'] == token_id:
                     for k,v in i.items():
@@ -124,7 +125,8 @@ class ApexClient(discord.Client):
                             msg+=f'{k}: {v}'+'\n'
                             if k in 'image':
                                 img = v
-                    await message.channel.send(img)
+                                await message.channel.send(img)
+            await message.channel.send(msg)
 
     async def on_member_join(self, member):
         guild = member.guild
