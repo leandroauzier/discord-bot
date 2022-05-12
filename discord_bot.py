@@ -127,17 +127,20 @@ class ApexClient(discord.Client):
             for i in nft_info['response']['nfts']:
                 if i['nft_id'] == token_id.content[0]:
                     for k,v in i.items():
-                        if k in ['D_token_ID', 'nft_id','name','image','meta_score','rarity_score',
+                        if k in ['nft_id','name','image','meta_score','rarity_score',
                                 'score','ranking', 'adjusted_meta_score', 'adjusted_rarity_score', 
                                 'adjusted_score', 'adjusted_ranking', 'last_price', 'owner'] and v not in [None, '']:
                             if k == 'image':
                                 img += v
-                            if k == 'score':
+                                continue
+                            elif k == 'score':
                                 v = v/100
                                 msg+=f'{k}: {v}'+'\n'
-                            if k == 'last_price':
+                                continue
+                            elif k == 'last_price':
                                 v = int(v)/pow(10, 18)
                                 msg+=f'{k}: {v}'+'\n'
+                                continue
                             else:
                                 msg+=f'{k}: {v}'+'\n'
             embed = discord.Embed()
