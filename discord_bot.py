@@ -1,9 +1,10 @@
 import discord
+import os
 import logging
-from cairosvg import svg2png
 from env_search import DISCORD_TOKEN
 from public_api import list_of_collections, list_of_transactions, info_from_collection
 from query import get_collection_from_db, set_collection_server_id
+from save_image import save_template
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
@@ -115,7 +116,7 @@ class ApexClient(discord.Client):
             await message.channel.send(f"{message.author.mention}, Please insert the ID of the NFT you want to know more about:")
             def check(token_id):
                 if token_id.author == message.author:
-                    return m.channel == message.channel
+                    return token_id.channel == message.channel
             token_id = await client.wait_for('message', check=check)
             cur_server_id = message.guild.id
             slct_collection = get_collection_from_db(cur_server_id)
@@ -124,18 +125,32 @@ class ApexClient(discord.Client):
             msg = ''
             img = ''
             for i in nft_info['response']['nfts']:
-                if i['nft_id'] == token_id:
+                if i['nft_id'] == token_id.content[0]:
                     for k,v in i.items():
                         if k in ['D_token_ID', 'nft_id','name','image','meta_score','rarity_score',
                                 'score','ranking', 'adjusted_meta_score', 'adjusted_rarity_score', 
                                 'adjusted_score', 'adjusted_ranking', 'last_price', 'owner'] and v not in [None, '']:
-                            msg+=f'{k}: {v}'+'\n'
-                            if k in 'image':
+                            if k == 'image':
                                 img += v
-            png = svg2png(url=img, write_to='image.png')
-            await message.channel.send(png)
-            await message.channel.send(msg)
-
+                            if k == 'score':
+                                v = v/100
+                                msg+=f'{k}: {v}'+'\n'
+                            if k == 'last_price':
+                                v = int(v)/pow(10, 18)
+                                msg+=f'{k}: {v}'+'\n'
+                            else:
+                                msg+=f'{k}: {v}'+'\n'
+            embed = discord.Embed()
+            embed.description = msg
+            n_img = save_template(img)
+            await message.channel.send(file=discord.File(n_img))
+            await message.channel.send(embed=embed)
+            print(os.getcwd())
+            if os.path.isfile(n_img):
+                os.remove(n_img)
+            else:
+                raise Exception('File not found')
+            
     async def on_member_join(self, member):
         guild = member.guild
         if guild.system_channel is not None:
