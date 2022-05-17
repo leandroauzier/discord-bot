@@ -5,6 +5,7 @@ from env_search import DISCORD_TOKEN
 from public_api import list_of_collections, list_of_transactions, info_from_collection
 from query import get_collection_from_db, set_collection_server_id
 from save_image import save_template
+from vips import svg_conversion
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
@@ -25,10 +26,17 @@ class ApexClient(discord.Client):
         if message.author == client.user:
             return
         if message.content == '!configbot':
-            await message.channel.send('Type the number for configuration:\n1-Set Collection')
+            await message.channel.send('Type the number for configuration:\n\n1-Set Collection\n2-Get Configured Collection')
             def check(m):
                 if m.author == message.author:
-                    return m.content == '1' and m.channel == message.channel
+                    if m.content == '1':
+                        print('1 worked')
+                        return m.content == '1' and m.channel == message.channel
+                    if m.content == '2':
+                        cur_server_id = message.guild.id
+                        slct_collection = get_collection_from_db(cur_server_id)
+                        print('2 worked')
+                        return m.content == '2' and m.channel == message.channel
             m = await client.wait_for('message', check=check)
             await message.channel.send(f'{m.author}, Please insert the contract of your collection:')
             def confirm(contract):
@@ -145,7 +153,8 @@ class ApexClient(discord.Client):
                                 msg+=f'{k}: {v}'+'\n'
             embed = discord.Embed()
             embed.description = msg
-            n_img = save_template(img)
+            # n_img = save_template(img)
+            n_img = svg_conversion(img)
             await message.channel.send(file=discord.File(n_img))
             await message.channel.send(embed=embed)
             print(os.getcwd())
