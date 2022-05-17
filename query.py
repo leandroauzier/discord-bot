@@ -74,3 +74,4 @@ def set_collection_server_id(contract, server_id):
         raise e
     finally:
         cn.close()
+        
