@@ -1,9 +1,10 @@
+import asyncio
 import discord
 import os
 import logging
 from env_search import DISCORD_TOKEN
 from public_api import list_of_collections, list_of_transactions, info_from_collection
-from query import get_collection_from_db, set_collection_server_id
+from query import get_collection_from_acronyms_id, set_collection_server_id
 from save_image import save_template
 from vips import svg_conversion
 
@@ -11,12 +12,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 def get_collections():
-    myReq = list_of_collections()
-    reformed = []
-    for coll in myReq:
-        if coll is not None:
-            reformed.append((coll['name'], coll['acronym']))
+    reformed=[]
+    for i in range(10):
+        c = list_of_collections(150, i*150)
+        if c is None:
+            break
+        reformed.append(c)
+    print(f'Reformed: {reformed[0][0]}')
     return reformed
+
+get_collections()
 
 class ApexClient(discord.Client):
     async def on_ready(self):
@@ -28,35 +33,46 @@ class ApexClient(discord.Client):
         if message.content == '!configbot':
             await message.channel.send('Type the number for configuration:\n\n1-Set Collection\n2-Get Configured Collection')
             def check(m):
-                if m.author == message.author:
-                    if m.content == '1':
-                        print('1 worked')
-                        return m.content == '1' and m.channel == message.channel
-                    if m.content == '2':
-                        cur_server_id = message.guild.id
-                        slct_collection = get_collection_from_db(cur_server_id)
-                        print('2 worked')
-                        return m.content == '2' and m.channel == message.channel
-            m = await client.wait_for('message', check=check)
-            await message.channel.send(f'{m.author}, Please insert the contract of your collection:')
-            def confirm(contract):
-                if m.author == message.author:
-                    return contract.channel == message.channel
-            contract = await client.wait_for('message', check=confirm)
-            if set_collection_server_id(contract.content, message.guild.id) == False:
-                await message.channel.send('This collection was already set up!')
-            else:
-                await message.channel.send('contract updated!')
+                return m.author == message.author and m.channel == message.channel
+            try:
+                m = await client.wait_for('message', timeout=15.0, check=check)
+                if m.content == '1':
+                    await message.channel.send(f'{m.author}, Please insert the contract of your collection:')
+                    def confirm(contract):
+                        return m.author == message.author and contract.channel == message.channel
+                    try:
+                        contract = await client.wait_for('message', check=confirm)
+                        print(f"THIS SERVER ID IS: {message.guild.id}")
+                        checking = set_collection_server_id(str(contract.content), str(message.guild.id))
+                        if checking == 0:
+                            await message.channel.send('This collection was already set up!')
+                        elif checking == 1:
+                            await message.channel.send('Collection Updated!')
+                        elif checking == 2:
+                            await message.channel.send('New collection Set up!')
+                    except Exception as e:
+                        raise e
+                    return
+                elif m.content == '2':
+                    cur_server_id = message.guild.id
+                    await message.channel.send(get_collection_from_acronyms_id(cur_server_id))
+                    return
+                else:
+                    await message.channel.send('Invalid option, exiting...')
+            except asyncio.TimeoutError:
+                await message.channel.send(f"\n:stopwatch: {message.author.mention}, The timeout has reached, please try again")
+            
         
         elif message.content == '!help':
-            dm = (f":wave: {message.author.name}, Here are some commands you can type (always use '!'):\n\n"
+            embed = discord.Embed(color=discord.Color.orange())
+            embed.description = (f":wave: {message.author.mention}, Here are some commands you can type (always use '!'):\n\n"
             "- !help [bot returns you this command list again]\n"
             "- !hello [bot returns you a hello text]\n"
             "- !rules [returns you the rules that this server demands from its members]\n"
             "- !api [returns you the link of ApexGO's Public API documentation]\n"
             "- !transactions <days> [returns you the last 20 transactions in the input days, (7, 15 ,30)]\n"
             "- !nft [Get information for a specific ID NFT]\n")
-            await message.channel.send(dm)
+            await message.channel.send(embed=embed)
         elif message.content == '!hello':
             await message.channel.send(f'!Hello, {message.author.name}')
         elif message.content == '!rules':
@@ -79,7 +95,7 @@ class ApexClient(discord.Client):
             elif message.content == f'!transactions 30':
                 days = 30
             cur_server_id = message.guild.id
-            slct_collection = get_collection_from_db(cur_server_id)
+            slct_collection = get_collection_from_acronyms_id(cur_server_id)
             full_transactions = list_of_transactions(slct_collection,days)
             transactions = []
             for i in full_transactions:
@@ -127,7 +143,7 @@ class ApexClient(discord.Client):
                     return token_id.channel == message.channel
             token_id = await client.wait_for('message', check=check)
             cur_server_id = message.guild.id
-            slct_collection = get_collection_from_db(cur_server_id)
+            slct_collection = get_collection_from_acronyms_id(cur_server_id)
             nft_info = info_from_collection(slct_collection)
             await message.channel.send(f"{message.author.mention}, Here's the info about the NFT you requested:\n\n")
             msg = ''
