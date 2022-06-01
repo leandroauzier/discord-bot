@@ -19,7 +19,9 @@ def conn():
     except Exception as e:
         logger.error("Couldn't connect to database", exc_info=True)
         raise e
-
+'''
+GET FUNCTIONS
+'''
     
 def get_from_acronyms():
     db_query = []
@@ -54,23 +56,52 @@ def get_collection_from_acronyms_id(server_id):
         raise e
     finally:
         cn.close()
+        
 
+'''
+SET FUNCTIONS
+'''
 
-def set_collection_server_id(contract, server_id):
+def Set_collections_tb(name, contract):
+    try:
+        cn = conn()
+        cs = cn.cursor()
+        cs.execute(f"INSERT INTO collections (name, contract) Value ('{name}', '{contract}');")
+        result = cs.fetchall()
+    except Exception as e:
+        logger.error("Error on inserting new Collection!", exc_info=True)
+        raise e
+    finally:
+        cn.close()
+        
+def Set_server_tb(new_server):
+    check = get_collection_from_acronyms_id()
+    try:
+        cn = conn()
+        cs = cn.cursor()
+        cs.execute(f"INSERT INTO servers (server) Value ('{new_server}');")
+        result = cs.fetchall()
+    except Exception as e:
+        logger.error("Error on inserting new server!", exc_info=True)
+        raise e
+    finally:
+        cn.close()
+
+def Set_acronyms(collection_id, server_id):
     c_list = get_from_acronyms()
     for c in c_list:
         print(c)
         id_c = collection_id(c)
         if server_id != c[2]:
             continue
-        elif server_id == c[2] and contract == c[3]:
+        elif server_id == c[2] and collection_id == c[3]:
             print('return 0')
             return 0
-        elif server_id == c[2] and contract != c[3]:
+        elif server_id == c[2] and collection_id != c[3]:
                 try:
                     cn = conn()
                     cs = cn.cursor()
-                    cs.execute(f"UPDATE acronyms SET contract='{contract}' WHERE server_id='{server_id}';")
+                    cs.execute(f"UPDATE acronyms SET collection_id='{collection_id}' WHERE server_id='{server_id}';")
                     cn.commit()
                     print('UPDATED EXECUTED!')
                 except Exception as e:
@@ -83,7 +114,7 @@ def set_collection_server_id(contract, server_id):
     try:
         cn = conn()
         cs = cn.cursor()
-        cs.execute(f"INSERT INTO acronyms (server_id, contract) Value ('{server_id}', '{contract}');")
+        cs.execute(f"INSERT INTO acronyms (server_id, collection_id) Value ('{server_id}', '{collection_id}');")
         print('QUERY EXECUTED!')
         result = cs.fetchall()
     except Exception as e:  

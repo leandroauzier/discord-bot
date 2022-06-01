@@ -1,5 +1,3 @@
-from distutils.log import info
-from subprocess import list2cmdline
 import requests
 import time
 import logging
@@ -39,9 +37,14 @@ def list_of_collections(limit, offset):
         return None
 
 @retry
-def list_of_transactions(collection, days):
-    resp = requests.get(url=f"https://dev-apexgopublicapi.com/v1/transactions?collection_name={collection}&interval_days={days}", headers=base_data())
-    return resp.json()
+def list_of_transactions(collection, days, limit, offset):
+    resp = requests.get(url=f"https://dev-apexgopublicapi.com/v1/transactions?collection_name={collection}&interval_days={days}&limit={limit}&offset={offset}", headers=base_data())
+    print('GET REQUESTED')
+    pag = resp.json()['paging']['pages']
+    if offset <= pag*limit:
+        return resp.json()['response']
+    else:
+        return None
 
 @retry
 def info_from_collection(collection):
