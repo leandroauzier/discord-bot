@@ -8,6 +8,8 @@ def save_template(url):
     'BEARER_PUBLIC_API': BEARER_PUBLIC_API,
     }
     
+    
+    
     os.chdir('.')
     if not os.path.exists('nft_images'):
         os.makedirs('nft_images')
