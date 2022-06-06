@@ -1,4 +1,3 @@
-from urllib import response
 import mysql.connector
 import logging
 from env_search import DATABASE, HOST, PASSWORD, USER

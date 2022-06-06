@@ -31,11 +31,6 @@ def base_data():
 def list_of_collections(limit, offset):
     resp = requests.get(url=f"https://dev-apexgopublicapi.com/v1/collections?limit={limit}&offset={offset}", headers=base_data())
     return resp.json()
-    # pag = resp.json()['paging']['pages']
-    # if offset <= pag*limit:
-    #     return resp.json()['response']
-    # else: 
-    #     return None
 
 @retry
 def list_of_transactions(collection, days, limit, offset):
