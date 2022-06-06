@@ -34,40 +34,41 @@ async def on_ready():
     print(f'Bot is ready for use on Discord!')
 
 @client.command()
-async def configbot(ctx):
+async def getcollection(ctx):
     if ctx.author == client.user:
         return
-    menu = discord.Embed(title="Config your bot", color=0xA7F3D0)
-    menu.description = 'Type the number for configuration:\n\n:one: - Set Collection\n:two: - Get Configured Collection'
-    await ctx.channel.send(embed=menu)
-    def check(m):
-        return m.author == ctx.author and m.channel == ctx.channel
     try:
-        m = await client.wait_for('message', timeout=15.0, check=check)
-        if m.content == '1':
-            print('Input 1')
-            new_contract = discord.Embed(color=0xA7F3D0)
-            new_contract.description=f'{m.author}, Please insert the contract of your collection:'
-            await ctx.channel.send(embed=new_contract)
-            def confirm(contract):
-                return m.author == ctx.author and contract.channel == ctx.channel
-            try:
-                contract = await client.wait_for('message', check=confirm)
-                print(f"THIS SERVER ID IS: {ctx.guild.id}")
-                checking = Set_acronyms(str(contract.content), str(ctx.guild.id))
-                if checking == 0:
-                    await ctx.channe.lsend('This collection was already set up!')
-                elif checking == 1:
-                    await ctx.channel.send('Collection Updated!')
-                elif checking == 2:
-                    await ctx.channel.send('New collection Set up!')
-            except Exception as e:
-                raise e
-            return
-        elif m.content == '2':
-            print('Input 2')
-            cur_server_id = ctx.guild.id
-            await ctx.channel.send(get_collection_from_acronyms_id(cur_server_id))
+    # menu = discord.Embed(title="Config your main bot collection", color=0xA7F3D0)
+    # menu.description = 'Type the number for configuration:\n\n:one: - Set Collection\n:two: - Get Configured Collection'
+    # await ctx.channel.send(embed=menu)
+    # def check(m):
+    #     return m.author == ctx.author and m.channel == ctx.channel
+    # try:
+    #     m = await client.wait_for('message', timeout=15.0, check=check)
+    #     if m.content == '1':
+    #         print('Input 1')
+            # new_contract = discord.Embed(color=0xA7F3D0)
+            # new_contract.description=f'{m.author}, Please insert the contract of your collection:'
+            # await ctx.channel.send(embed=new_contract)
+            # def confirm(contract):
+            #     return m.author == ctx.author and contract.channel == ctx.channel
+            # try:
+            #     contract = await client.wait_for('message', check=confirm)
+            #     print(f"THIS SERVER ID IS: {ctx.guild.id}")
+            #     checking = Set_acronyms(str(contract.content), str(ctx.guild.id))
+            #     if checking == 0:
+            #         await ctx.channe.lsend('This collection was already set up!')
+            #     elif checking == 1:
+            #         await ctx.channel.send('Collection Updated!')
+            #     elif checking == 2:
+            #         await ctx.channel.send('New collection Set up!')
+            # except Exception as e:
+            #     raise e
+            # return
+    # if m.content == '2':
+    #     print('Input 2')
+        cur_server_id = ctx.guild.id
+        if await ctx.channel.send(get_collection_from_acronyms_id(cur_server_id)) is not None:
             return
         else:
             await ctx.channel.send('Invalid option, exiting...')
@@ -81,6 +82,8 @@ async def help(ctx, *arg):
         embed.description = ("**__Bot commands__**:\n\n"
         "**Rank:**\n!rank\n"
         "**NFT Stats:**\n!nft <id>\n"
+        "**Get current Collection:**\n!getcollection\n"
+        "**Set a Collection:**\n!setcollection\n"
         "**Help:**\n!help\n"
         "**Rules:**\n!rules\n"
         "**Apexgo Extension:**\n!ext\n"
@@ -134,7 +137,7 @@ async def transactions(ctx, *arg):
                 # added_msg = '# **ID:** ' + "[" + t['token_id'] +"]"+"(https://apexgo.io/nft/"+ t['collection_name'] +'/'+ t['token_id'] +')' + ' , **value:** ' + str(int(t['price'])/ pow(10, 18)) + ' ' + t['coin_symbol']
                 if len(embed.description) <= 2000:
                     print('entered')
-                    embed.description += (f"[" + t['token_id'] +"]"+"(https://apexgo.io/nft/"+ t['collection_name'] +'/'+ t['token_id'] +')   |   '+str(int(t['price'])/ pow(10, 18)) + ' ' + t['coin_symbol']+"\n")
+                    embed.description += (f"[" + t['token_id'] +"]"+"(https://apexgo.io/nfts/"+ t['collection_name'] +'/'+ t['token_id'] +')   |   '+str(int(t['price'])/ pow(10, 18)) + ' ' + t['coin_symbol']+"\n")
                     count_trans += 1
                     print('added more in description')
                     # if int(t['price']) > current_highest:
@@ -171,16 +174,19 @@ async def transactions(ctx, *arg):
 
 @client.command()
 async def nft(ctx, *arg):
-        this_arg = arg[0]
-        if this_arg.isnumeric():
-            token_id = str(this_arg)
+        if arg[0].isnumeric():
+            token_id = str(arg[0])
             cur_server_id = ctx.guild.id
             slct_collection = get_collection_from_acronyms_id(cur_server_id)
+            print('Got Selected collection: ' + slct_collection)
             nft_info = info_from_collection(slct_collection)
+            print('Got NFT info' + nft_info['name'])
             msg = ''
             img = ''
             title = ''
             for i in nft_info['response']['nfts']:
+                
+                print(f'TOKEN:{token_id}')
                 if i['nft_id'] == token_id:
                     print('YES')
                     for k,v in i.items():
