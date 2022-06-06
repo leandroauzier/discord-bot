@@ -1,6 +1,8 @@
+from urllib import response
 import mysql.connector
 import logging
 from env_search import DATABASE, HOST, PASSWORD, USER
+from public_api import list_of_collections
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
@@ -22,6 +24,35 @@ def conn():
 '''
 GET FUNCTIONS
 '''
+
+def get_from_api():
+    limit = 150
+    offset = 0
+    pag = 1
+    collection_list = []
+    try:
+        for p in range(0,pag+1):
+            if p < pag:
+                collections = list_of_collections(limit,offset)
+                pag == collections['paging']['pages']
+                for c in range(0,len(collections['response'])):
+                    if c is not None:
+                        item = collections['response'][c]
+                        if c < limit-1 and len(collections['response']) <= limit:
+                            collection_list.append((item['name'],item['contract_address']))
+                        elif c == len(collections['response']):
+                            collection_list.append((item['name'],item['contract_address']))
+                            break
+                        elif c == limit-1:
+                            collection_list.append((item['name'],item['contract_address']))
+                            pag += 1
+                            offset+=150
+                    else:
+                        print('Null value')
+        return collection_list
+    except Exception as e:
+        logger.error("There was an error inserting First data!", exc_info=True)
+        raise e
     
 def get_from_acronyms():
     db_query = []
@@ -66,8 +97,9 @@ def Set_collections_tb(name, contract):
     try:
         cn = conn()
         cs = cn.cursor()
-        cs.execute(f"INSERT INTO collections (name, contract) Value ('{name}', '{contract}');")
+        cs.execute(f"INSERT INTO collections (name, contract) SELECT * FROM (SELECT '{name}', '{contract}') AS tmp WHERE NOT EXISTS (SELECT name FROM Collections WHERE name = '{name}') LIMIT 1;")
         result = cs.fetchall()
+        cn.commit()
     except Exception as e:
         logger.error("Error on inserting new Collection!", exc_info=True)
         raise e
@@ -81,6 +113,7 @@ def Set_server_tb(new_server):
         cs = cn.cursor()
         cs.execute(f"INSERT INTO servers (server) Value ('{new_server}');")
         result = cs.fetchall()
+        cn.commit()
     except Exception as e:
         logger.error("Error on inserting new server!", exc_info=True)
         raise e

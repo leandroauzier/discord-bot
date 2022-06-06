@@ -78,7 +78,7 @@ async def configbot(ctx):
 @client.command()
 async def help(ctx, *arg):
         embed = discord.Embed(title="Apexgo Bot Help", color=0xA7F3D0)
-        embed.description = ("__Bot commands__:\n\n"
+        embed.description = ("**__Bot commands__**:\n\n"
         "**Rank:**\n!rank\n"
         "**NFT Stats:**\n!nft <id>\n"
         "**Help:**\n!help\n"
