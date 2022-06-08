@@ -94,6 +94,7 @@ async def help(ctx, *arg):
         embed.description = ("**__Bot commands__**:\n\n"
         "**Rank:**\n!rank\n"
         "**NFT Stats:**\n!nft <id>\n"
+        "**Refresh the collection's table:**\n!refresh\n"
         "**Get current Collection:**\n!getcollection\n"
         "**Set a Collection:**\n!setcollection\n"
         "**Help:**\n!help\n"
