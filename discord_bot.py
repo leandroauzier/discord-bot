@@ -39,7 +39,7 @@ async def refresh(ctx, *arg):
         db = get_from_api()
         for c in db:
             Set_collections_tb(c[0],c[1])
-        advise = discord.Embed("Database refreshed!")
+        advise = discord.Embed(embed="Database refreshed!")
         await ctx.member.send(advise)
     except Exception as e:
         raise e
