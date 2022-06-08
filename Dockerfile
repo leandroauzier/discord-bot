@@ -23,6 +23,4 @@ RUN pip3 install -r requirements.txt
 
 COPY . .
 
-RUN python3 discord_bot.py &
-
-CMD [ "python3", "-m", "http.server", "8080"]
+CMD [ "python3", "discord_bot.py"]
