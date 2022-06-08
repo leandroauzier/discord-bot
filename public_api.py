@@ -17,7 +17,7 @@ def retry(func, retries=4):
                 time.sleep(2)
                 attempts += 1
             if attempts >= retries:
-                return 'Couldn establish conection!'
+                return "Could'n establish conection!"
     return retry_wrapper
 
 def base_data():
@@ -25,7 +25,6 @@ def base_data():
         "Authorization": f"Bearer {BEARER_PUBLIC_API}"
     }
     return headers
-
 
 @retry
 def list_of_collections(limit, offset):
@@ -35,12 +34,7 @@ def list_of_collections(limit, offset):
 @retry
 def list_of_transactions(collection, days, limit, offset):
     resp = requests.get(url=f"https://dev-apexgopublicapi.com/v1/transactions?collection_name={collection}&interval_days={days}&limit={limit}&offset={offset}", headers=base_data())
-    print('GET REQUESTED')
-    pag = resp.json()['paging']['pages']
-    if offset <= pag*limit:
-        return resp.json()['response']
-    else:
-        return None
+    return resp.json()
 
 @retry
 def info_from_collection(collection):

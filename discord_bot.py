@@ -5,7 +5,7 @@ import logging
 from env_search import DISCORD_TOKEN
 from discord.ext import commands
 from public_api import list_of_collections, list_of_transactions, info_from_collection
-from query import get_collection_from_acronyms_id, Set_acronyms
+from query import Set_collections_tb, get_collection_from_acronyms_id, Set_acronyms, get_from_api
 from vips import svg_conversion
 
 logging.basicConfig(level=logging.INFO)
@@ -27,11 +27,22 @@ client.remove_command('help')
 
 @client.command()
 async def hello(ctx, *, arg):
-    texto = f"you said:\n> {arg}"
-    await ctx.send(texto)
+    texto = f"Hello! you said:\n> {arg}"
+    await ctx.channel.send(texto)
 
 async def on_ready():
     print(f'Bot is ready for use on Discord!')
+    
+@client.command()
+async def refresh(ctx, *arg):
+    try:
+        db = get_from_api()
+        for c in db:
+            Set_collections_tb(c[0],c[1])
+        advise = discord.Embed("Database refreshed!")
+        await ctx.member.send(advise)
+    except Exception as e:
+        raise e
 
 @client.command()
 async def getcollection(ctx):
@@ -68,6 +79,7 @@ async def getcollection(ctx):
     # if m.content == '2':
     #     print('Input 2')
         cur_server_id = ctx.guild.id
+        print('reached')
         if await ctx.channel.send(get_collection_from_acronyms_id(cur_server_id)) is not None:
             return
         else:
@@ -113,7 +125,8 @@ async def transactions(ctx, *arg):
         slct_collection = get_collection_from_acronyms_id(cur_server_id)
         transactions = []
         for c in range(30):
-            full_transactions = list_of_transactions(slct_collection, days,50,c*50)
+            ft = list_of_transactions(slct_collection, days,50,c*50)
+            full_transactions = ft['response']
             if full_transactions is not None:
                 page = [i for i in full_transactions]
                 transactions.append(page)
@@ -126,6 +139,7 @@ async def transactions(ctx, *arg):
         # highest_t = 0
         # lowest_t = 0
         if len(transactions) > 0:
+            print(len(transactions))
             embed = discord.Embed(title=f"Transactions {arg[0]}", color=0xA7F3D0)
             embed.description ="**ID**   |   **Price**   \n\n"
             for ind, t in enumerate(transactions[0]):
@@ -137,7 +151,7 @@ async def transactions(ctx, *arg):
                 # added_msg = '# **ID:** ' + "[" + t['token_id'] +"]"+"(https://apexgo.io/nft/"+ t['collection_name'] +'/'+ t['token_id'] +')' + ' , **value:** ' + str(int(t['price'])/ pow(10, 18)) + ' ' + t['coin_symbol']
                 if len(embed.description) <= 2000:
                     print('entered')
-                    embed.description += (f"[" + t['token_id'] +"]"+"(https://apexgo.io/nfts/"+ t['collection_name'] +'/'+ t['token_id'] +')   |   '+str(int(t['price'])/ pow(10, 18)) + ' ' + t['coin_symbol']+"\n")
+                    embed.description += (f"{t['token_id']}"+"(https://apexgo.io/nft/"+ t['collection_name'] +'/'+ t['token_id'] +')   |   '+str(int(t['price'])/ pow(10, 18)) + ' ' + t['coin_symbol']+"\n")
                     count_trans += 1
                     print('added more in description')
                     # if int(t['price']) > current_highest:
@@ -185,7 +199,6 @@ async def nft(ctx, *arg):
             img = ''
             title = ''
             for i in nft_info['response']['nfts']:
-                
                 print(f'TOKEN:{token_id}')
                 if i['nft_id'] == token_id:
                     print('YES')
